@@ -2,6 +2,8 @@
 
 an api for user-defined collision-detection between [aabb-2d](https://github.com/chrisdickinson/aabb-2d) objects and tilemaps.
 
+[here's a demo.](http://didact.us/collide-2d-tilemap/)
+
 ```javascript
 
 var my_tilemap = [
