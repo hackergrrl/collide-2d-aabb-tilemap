@@ -14,14 +14,16 @@ module.exports = function(field, tilesize, dimensions, offset) {
     return this[x + y * dimensions[1]]
   }.bind(field) 
 
-  var coords
-
-  coords = [0, 0]
+  var coords = [0, 0]
+  var move = [0, 0]
 
   return collide
 
   function collide(box, vec, oncollision) {
     if(vec[0] === 0 && vec[1] === 0) return
+
+    move[0] = vec[0]
+    move[1] = vec[1]
 
     // collide x, then y
     collideaxis(0)
@@ -29,11 +31,11 @@ module.exports = function(field, tilesize, dimensions, offset) {
 
     function collideaxis(axis) {
       var posi = vec[axis] > 0
-        , leading = box[posi ? 'max' : 'base'][axis] 
+        , leading = posi ? box[axis] + box[axis+2] : box[axis]
         , dir = posi ? 1 : -1
         , opposite_axis = +!axis
-        , start = Math.floor(box.base[opposite_axis] / tilesize)|0
-        , end = Math.ceil(box.max[opposite_axis] / tilesize)|0
+        , start = Math.floor(box[opposite_axis] / tilesize)|0
+        , end = Math.ceil((box[opposite_axis] + box[opposite_axis+2]) / tilesize)|0
         , tilespace = Math.floor(leading / tilesize)|0
         , tilespace_end = (Math.floor((leading + vec[axis]) / tilesize)|0) + dir
         , done = false
@@ -45,9 +47,6 @@ module.exports = function(field, tilesize, dimensions, offset) {
       //    -> loop on the opposite axis to get the other candidates
       //      -> if `oncollision` return `true` we've hit something and
       //         should break out of the loops entirely.
-      //         NB: `oncollision` is where the client gets the chance
-      //         to modify the `vec` in-flight.
-      // once we're done translate the box to the vec results
       for(var i = tilespace; !done && i !== tilespace_end; i += dir) {
         if(i < offset[axis] || i >= dimensions[axis]) continue
         for(var j = start; j !== end; ++j) {
@@ -62,16 +61,15 @@ module.exports = function(field, tilesize, dimensions, offset) {
           edge = dir > 0 ? i * tilesize : (i + 1) * tilesize
           edge_vector = edge - leading
 
-          if(oncollision(axis, tile, coords, dir, edge_vector)) {
+          if(oncollision(axis, tile, coords)) {
             done = true
+            move[axis] = edge_vector
             break
           } 
         }
       }
-
-      coords[0] = coords[1] = 0
-      coords[axis] = vec[axis]
-      box.translate(coords)
     }
+
+    return move
   }  
 }

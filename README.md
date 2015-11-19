@@ -1,89 +1,83 @@
-# collide-2d-tilemap
+# collide-2d-aabb-tilemap
 
-an api for user-defined collision-detection between [aabb-2d](https://github.com/chrisdickinson/aabb-2d) objects and tilemaps.
+> Determines whether a moving axis-aligned bounding box collides with a tilemap, and prevents intersection.
 
-[here's a demo.](http://didact.us/collide-2d-tilemap/)
+
+## Example
+
+[Here's a playable demo.](http://didact.us/collide-2d-tilemap/)
+
+Example usage:
 
 ```javascript
+var collideAabbTilemap = require('collide-2d-aabb-tilemap')
 
-var my_tilemap = [
-        0, 0, 0, 1
-      , 1, 0, 0, 1
-      , 1, 0, 0, 1
-      , 1, 1, 1, 1
-    ]
+var tilemap = [
+    [ 0, 0, 0, 1 ],
+    [ 1, 0, 0, 1 ],
+    [ 1, 0, 0, 1 ],
+    [ 1, 1, 1, 1 ]
+]
 
-var collisions = require('collide-2d-tilemap')
-  , collide
+// (0,0) - (16,16)
+var player = [0, 0, 16, 16]
 
-var player = aabb([0, 0], [16, 16])
-  , vec = [0, 0]
-
-// collisions(field, size of tile in pixels, [width, height])
-collide = collisions(my_tilemap, 32)
+// collideAabbTilemap(field, size of tile in pixels, [width, height])
+collide = collideAabbTilemap(my_tilemap, 32, [4, 4])
 
 my_game_event_loop(function(dt) {
-  vec = get_player_input() * dt 
+  var vec = get_player_input() * dt 
 
-  collide(player, vec, function(axis, tile_data, coords, dir, diff) {
-    if(tile) {
-      vec[axis] = diff
-      return true
-    }
+  collide(player, vec, function(moveAxis, moveDir, tileIdx, tileCoords) {
+    // true => solid
+    return tileIdx > 0
   })
-
 })
 
 ```
 
-the method used is borrowed [from higherorderfun](http://higherorderfun.com/blog/2012/05/20/the-guide-to-implementing-2d-platformers/).
+The algorithm used is taken from [this
+article](http://higherorderfun.com/blog/2012/05/20/the-guide-to-implementing-2d-platformers/).
+Detection and correction is applied on each X and Y axis separately.
 
-in short:
 
-1. for movement in each axis (x, y):
-2. we go from the tile coordinate of the leading edge of the movement to the tile coordinate of the destination of that edge.
-3. we go from the base tile coordinate of the opposite axis to the max tile coordinate of the opposite axis.
-4. for each of those tile coordinates `<x>` and `<y>`, we call the `oncollision` callback. if it returns true, we've hit something and we stop checking that axis for collisions.
-5. we apply the movement contained in `vec[axis]` to the box.
+## Usage
 
-this lets you do things like add slopes, add effects that don't necessarily stop collision, etc, etc.
-
-> ## Warning
-> For best results, use integers.
-> If you're using gl-matrix, you can simply
-> swap out `vec2.create` with `vec2.create = function() { return new Int32Array(2) }`.
-
-# API
-
-### collision(field, tilesize[, dimensions]) -> collide function
+### var collide = collideAabbTilemap(array, tilesize[, dimensions])
 
 Produces a `collide(aabb, vec2, oncollide)` function.
 
-`field` may be a single-dimension array of integers (in which case `dimensions` can be inferred if not provided), or it may be a function in the form `fn(tile_x_idx, tile_y_idx) -> tile data integer`. if it's a function, `dimensions` is required.
+`array` may be a single-dimension array (or
+[ndarray](https://www.npmjs.com/package/ndarray)) of integers **OR** a function
+of the form `fn(tileX, tileY) -> integer`.
 
-`tilesize` is the pixel size of a tile. 
+`tilesize` are the pixel dimensions of a tile. 
 
-`dimensions` is an array of integers `[width, height]`.
-if it is not provided it will attempt to set to `[Math.sqrt(field.length), Math.sqrt(field.length)]` (that is, it assumes a square tilemap).
+`dimensions` is a size 2 array of integers, `[width, height]`. If it is not
+provided, the map will be assumed to be square.
 
-### collide(aabb, vec, oncollide) -> undefined
+### var offset = collide(aabb, moveDelta, onCollide)
 
-attempt to advance `aabb` by `vec` against the tilemap. **destructive**, it will actually call `aabb.translate`.
+Attempt to advance `aabb` by `moveDelta` against the aforementioned `tilemap`.
+Non-destructive.
 
-`vec` is assumed to be a `gl-matrix`-style `vec2`, or `[x, y]`.
+If there is no collision, `offset == moveDelta`. Otherwise, it will be shorter
+in one or both axes.
 
-`aabb` is assumed to be a [aabb-2d](https://github.com/chrisdickinson/aabb-2d) instance.
+`aabb` is assumed to be a size 4 array of the form `[x, y, width, height]`.
 
-`oncollide` is a callback function, taking:
+`moveDelta` is assumed to be a `gl-matrix`-style `vec2` or `[x, y]`.
 
-* `axis`: an integer representing the axis of movement. `0` or `1`.
-* `tile`: the tile data represented at this candidate coordinate.
-* `coords`: a two dimensional array of tile coordinates.
-* `dir`: `1` or `-1`, representing the direction of movement along this axis.
-* `dX`: the distance to the appropriate edge of this tile, if a collision is desired (such that you can write `vec[axis] = dX` if you'd like to collide with that tile). 
+`onCollide` is a callback function, taking the following arguments:
 
-If your callback returns `true`, it is assumed that you're done checking tiles along this access and it will move to the next axis if any.
+* `moveAxis`: an integer representing the axis of movement. `0` (X) or `1` (Y).
+* `tileIdx`: the tile integer data of the tile a candidate collision has been detected against.
+* `tileCoords`: a size 2 array of tile coordinates.
 
-# License
+If the callback returns a truthy value, the tile will be treated as solid, and
+no further tiles will be checked along this axis.
+
+
+## License
 
 MIT
