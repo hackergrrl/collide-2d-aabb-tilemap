@@ -1,6 +1,6 @@
 {
   "name": "collide-2d-aabb-tilemap",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Determines whether a moving axis-aligned bounding box collides with a tilemap, and prevents intersection.",
   "main": "index.js",
   "repository": {
