@@ -1,23 +1,28 @@
 {
-  "name": "collide-2d-tilemap",
+  "name": "collide-2d-aabb-tilemap",
   "version": "0.0.1",
-  "description": "2d tilemap collisions made simple-ish",
+  "description": "Determines whether a moving axis-aligned bounding box collides with a tilemap, and prevents intersection.",
   "main": "index.js",
-  "scripts": {
-    "test": "node test.js"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisdickinson/collide-2d-tilemap"
+    "url": "https://github.com/noffle/collide-2d-aabb-tilemap"
   },
   "keywords": [
     "collision",
     "2d",
-    "games",
+    "game",
     "aabb",
     "tilemap"
   ],
-  "author": "Chris Dickinson <chris@neversaw.us>",
-  "license": "MIT",
-  "gitHead": "91c9efaec78ab7739194f5336a5cabe48d1be9d0"
+  "author": [
+    {
+      "author": "Chris Dickinson <chris@neversaw.us>",
+      "role": "original implementation"
+    },
+    {
+      "author": "Stephen Whitmore <sww@eight45.net>",
+      "role": "non-destructive api and removed aabb-2d dep"
+    }
+  ],
+  "license": "MIT"
 }

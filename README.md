@@ -2,6 +2,11 @@
 
 > Determines whether a moving axis-aligned bounding box collides with a tilemap, and prevents intersection.
 
+Based off
+[collide-2d-tilemap](https://github.com/chrisdickinson/collide-2d-tilemap).
+The key difference is that this module provides a non-destructive API, and
+doesn't depend on [aabb-2d](https://github.com/chrisdickinson/aabb-2d).
+
 
 ## Example
 
@@ -71,6 +76,7 @@ in one or both axes.
 `onCollide` is a callback function, taking the following arguments:
 
 * `moveAxis`: an integer representing the axis of movement. `0` (X) or `1` (Y).
+* `moveDir`: either -1 or 1, denoting the direction of the movement.
 * `tileIdx`: the tile integer data of the tile a candidate collision has been detected against.
 * `tileCoords`: a size 2 array of tile coordinates.
 

@@ -61,7 +61,7 @@ module.exports = function(field, tilesize, dimensions, offset) {
           edge = dir > 0 ? i * tilesize : (i + 1) * tilesize
           edge_vector = edge - leading
 
-          if(oncollision(axis, tile, coords)) {
+          if(oncollision(axis, dir, tile, coords)) {
             done = true
             move[axis] = edge_vector
             break
